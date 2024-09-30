@@ -1,24 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+
+import {Link, Route, Switch} from "react-router-dom";
+import Main from "./pages/Main/Main";
+import PageTwo from "./pages/PageTwo/PageTwo";
+import PageOne from "./pages/PageOne/PageOne";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <div style={{"display":"flex", "flexDirection":"column", "height": "100vh"}}>
+          <ul className={'menu'}>
+              <li className={'menu-item'}>
+                  <Link to="/">Home Page</Link>
+              </li>
+              <li className={'menu-item'}>
+                  <Link to={'/page_one'}>Page one</Link>
+              </li>
+              <li className={'menu-item'}>
+                  <Link to={'/page_two'}>Page two</Link>
+              </li>
+          </ul>
+          <Switch>
+              <Route exact path={'/'} component={Main}/>
+              <Route path={'/page_one'} component={PageOne}/>
+              <Route path={'/page_two'} component={PageTwo}/>
+          </Switch>
+      </div>
   );
 }
 
