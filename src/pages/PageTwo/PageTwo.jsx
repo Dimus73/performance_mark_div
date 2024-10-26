@@ -1,5 +1,4 @@
 import React, {useEffect} from 'react';
-import SquareComponent from "../../components/SquareComponent/SquareComponent";
 import TowPartComponent from "../../components/TowPartComponent/TowPartComponent";
 
 const DELAY_LOAD = 1000;

@@ -1,9 +1,10 @@
 import React, {useEffect} from 'react';
 import SquareComponent from "../../components/SquareComponent/SquareComponent";
 
-const DELAY_LOAD = 100;
-const ITERATIONS = 1e2;
-const DIVS_COUNT = 1e4;
+// Задаем параметры нагрузки
+const DELAY_LOAD = 100;  // Эмуляция загрузки данных
+const ITERATIONS = 1e2;  // Эмуляция вычислений
+const DIVS_COUNT = 1e4;  // Количечтво элементов в списке
 
 const PageOne = () => {
     const [dataSet01, setDataSet01] = React.useState(false);
