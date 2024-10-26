@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
+import SimpleDiv from "../SimpleDiv";
 
-const ITERATIONS = 1e9;
 
 const performHeavyComputation = (iterations) => {
     let total = 0;
@@ -11,11 +11,30 @@ const performHeavyComputation = (iterations) => {
 };
 
 const SquareComponent = (props) => {
-
+    const {
+        iterations,
+        divs,
+    } = props
     const [isHover, setIsHover] = useState(false)
 
 
-    const result = performHeavyComputation(ITERATIONS);
+    const result = performHeavyComputation(iterations);
+
+    const setElementRef = (id) =>
+        (element) => {
+            if (element && id === divs.length-1){
+                // console.log("Draw element", element)
+                const start_marks = performance.getEntriesByName('navigation-start');
+                if (start_marks && start_marks.length)
+                    performance.mark('navigation-end');
+            }
+        }
+
+    const inStyle = {
+        display: 'flex',
+        flexWrap: 'wrap',
+        overflow: 'auto',
+    }
 
     return (
         <div
@@ -25,10 +44,23 @@ const SquareComponent = (props) => {
         >
             {props.children}
             <p>Результат вычисления: {result}</p>
+
             <div
                 className={'data-box-fon'}
-                style={isHover ? {"backgroundColor": "cyan"} : {}}
+                style={isHover ? {"backgroundColor": "cyan", ...inStyle} : {...inStyle}}
             >
+                {
+                    divs ?
+                    divs.map((_, key, arr) =>
+                        <SimpleDiv
+                            id={key}
+                            key={key}
+                            text={key}
+                            setElementRef={ key === (arr.length-1) ? setElementRef(key) : null }
+                        />)
+                    :
+                    null
+                }
             </div>
         </div>
     );

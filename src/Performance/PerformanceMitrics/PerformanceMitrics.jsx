@@ -1,92 +1,40 @@
-import { useEffect, useRef } from 'react';
-
-const PRINT_LOGS_TO_CONSOLE = true;
-const START_TIME_FOR_LONG_RENDERING_TASK = 50;
-const WAIT_LOOP_LENGTH = 3000;
+import { useEffect } from 'react';
 
 
 const PerformanceMetrics = () => {
-    const popRefTimer = useRef(0);
-    const currentTimer = useRef();
-    const currentLastEventEnd = useRef(0);
-    const performanceId = useRef();
-    const callList = useRef();
-    const refWriteLogEnable = useRef(true);
+
 
     useEffect(() => {
-        const checkTimeToInteractive = () => {
-            console.log("!!! ** In checkTimeToInteractive => performance.now() =>", performance.now());
-            console.log("!!! ** In checkTimeToInteractive => currentLastEventEnd.current =>", currentLastEventEnd.current);
+        // Проверяем наличие меток и измеряем время, если метка завершения есть
+        const handleNavigationEnd = () => {
+            if (performance.getEntriesByName('navigation-end').length > 0) {
+                performance.measure('page-load-time', 'navigation-start', 'navigation-end');
 
-            if (performance.now() - currentLastEventEnd.current >= WAIT_LOOP_LENGTH) {
-                sendData(currentLastEventEnd.current);
-            } else {
-                console.log("SetUp new timer")
-                currentTimer.current = setTimeout(checkTimeToInteractive, WAIT_LOOP_LENGTH);
+                const entries = performance.getEntriesByName('page-load-time');
+                if (entries.length) {
+                    const entry = entries[0];
+                    console.log(`Полное время загрузки и рендеринга страницы: ${entry.duration} мс`);
+                    // Очищаем метки и измерения
+                    performance.clearMarks('navigation-start');
+                    performance.clearMarks('navigation-end');
+                    performance.clearMeasures('page-load-time');
+                }
             }
         };
 
-        const performanceObserver = new window.PerformanceObserver(entryList => {
-            const currentLongTaskEvent = [];
-            const entries = entryList.getEntries();
-
-            if (PRINT_LOGS_TO_CONSOLE) console.log('*^* !!! PerformanceObserver entryList =>', entries);
-            if (PRINT_LOGS_TO_CONSOLE) console.log('*^* !!! performance.now, popRefTimer.current =>', performance.now(), popRefTimer.current);
-
-            entries.forEach((entry) => {
-                if (entry.entryType === 'longtask' && entry.duration > START_TIME_FOR_LONG_RENDERING_TASK) {
-                    currentLongTaskEvent.push(entry);
-                }
-            });
-            const lastEvent = currentLongTaskEvent[currentLongTaskEvent.length - 1];
-            if (PRINT_LOGS_TO_CONSOLE) console.log("!!! ** In Observer lastEvent =>", lastEvent);
-            if (lastEvent) {
-                currentLastEventEnd.current = lastEvent ? lastEvent.startTime + lastEvent.duration : 0;
-                if (currentTimer.current) {
-                    clearTimeout(currentTimer.current);
-                }
-                if (PRINT_LOGS_TO_CONSOLE) console.log("!!! ** In Observer currentLastEventEnd=>", currentLastEventEnd.current);
-                checkTimeToInteractive();
+        // Добавляем слушателя события, когда метка завершения установлена
+        const observer = new PerformanceObserver((list) => {
+            const entries = list.getEntriesByName('navigation-end');
+            if (entries.length > 0) {
+                handleNavigationEnd();
             }
         });
 
-        performanceObserver.observe({ entryTypes: ['longtask', 'paint'] });
+        observer.observe({ entryTypes: ['mark'] });
 
-        const performanceTimingInterval = setInterval(()=>{
-            const timing = window.performance.timing;
-            if (timing.loadEventEnd === 0)
-                console.log('@@ Page not ready eat');
-            else
-                console.log('@@ Page load time => ', timing.loadEventEnd - timing.navigationStart);
-        }, 50);
-
-        setTimeout(()=> {
-            clearInterval(performanceTimingInterval);
-            console.log('@@ Stop INTERVAL')
-        }, 20000)
-
-        return () => {
-            if (PRINT_LOGS_TO_CONSOLE) console.log("!!!! --- Unmount PerformanceMetrics.tsx");
-            performanceObserver.disconnect();
-            clearTimeout(currentTimer.current);
-        };
+        // Убираем слушателя при размонтировании компонента
+        return () => observer.disconnect();
     }, []);
-
-    const sendData = (lastEventEnd) => {
-
-        if (refWriteLogEnable.current) {
-            const BasePerformanceInfo = {
-                performanceId: performanceId.current,
-                href: window.location.href,
-                tti: lastEventEnd - popRefTimer.current,
-                lastEventEnd,
-                popRefTimer: popRefTimer.current,
-                component_name: '',
-            };
-
-            if (PRINT_LOGS_TO_CONSOLE) console.log('*^* !! Before save data =>', BasePerformanceInfo);
-        }
-    };
 
     return null;
 };

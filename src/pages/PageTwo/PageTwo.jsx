@@ -11,6 +11,7 @@ const PageTwo = () => {
     const [dataSet04, setDataSet04] = React.useState(false);
 
     useEffect(() => {
+        performance.mark('navigation-start');
         setTimeout(() => {setDataSet01(true)}, DELAY_LOAD);
     }, []);
 
@@ -26,7 +27,10 @@ const PageTwo = () => {
 
     useEffect(() => {
         if (dataSet03)
-            setTimeout(() => {setDataSet04(true)}, DELAY_LOAD);
+            setTimeout(() => {
+                setDataSet04(true)
+                performance.mark('navigation-end');
+            }, DELAY_LOAD);
     }, [dataSet03]);
 
     return (

@@ -1,7 +1,9 @@
 import React, {useEffect} from 'react';
 import SquareComponent from "../../components/SquareComponent/SquareComponent";
 
-const DELAY_LOAD = 1000;
+const DELAY_LOAD = 100;
+const ITERATIONS = 1e2;
+const DIVS_COUNT = 1e4;
 
 const PageOne = () => {
     const [dataSet01, setDataSet01] = React.useState(false);
@@ -9,7 +11,10 @@ const PageOne = () => {
     const [dataSet03, setDataSet03] = React.useState(false);
     const [dataSet04, setDataSet04] = React.useState(false);
 
+    const [divsArray, setDivsArray] = React.useState([]);
+
     useEffect(() => {
+        performance.mark('navigation-start');
         setTimeout(() => {setDataSet01(true)}, DELAY_LOAD);
     }, []);
 
@@ -25,7 +30,11 @@ const PageOne = () => {
 
     useEffect(() => {
         if (dataSet03)
-            setTimeout(() => {setDataSet04(true)}, DELAY_LOAD);
+            setTimeout(() => {
+                setDataSet04(true);
+                // performance.mark('navigation-end');
+                setDivsArray(Array.from({length:DIVS_COUNT}))
+            }, DELAY_LOAD);
     }, [dataSet03]);
 
     return (
@@ -33,22 +42,22 @@ const PageOne = () => {
             <h1>Page One</h1>
             <div className={'data-area'}>
                 {dataSet01 &&
-                    <SquareComponent>
+                    <SquareComponent iterations={ITERATIONS}>
                         Data box - 01
                     </SquareComponent>
                 }
                 {dataSet02 &&
-                    <SquareComponent>
+                    <SquareComponent iterations={ITERATIONS}>
                         Data box - 02
                     </SquareComponent>
                 }
                 {dataSet03 &&
-                    <SquareComponent>
+                    <SquareComponent iterations={ITERATIONS}>
                         Data box - 03
                     </SquareComponent>
                 }
                 {dataSet04 &&
-                    <SquareComponent>
+                    <SquareComponent iterations={ITERATIONS} divs={divsArray}>
                         Data box - 04
                     </SquareComponent>
                 }
